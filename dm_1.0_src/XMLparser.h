@@ -40,7 +40,6 @@ private:
 	void CopyCharBuff(char* &dest, char* source, std::streamoff len);
 	void ReadNode(char* buffer, std::streamoff& pos, XMLnode& node);
 	bool ClosingTag(char* buffer) const;
-	bool XMLparser::ParentNodeCloseTag(char* tag, char* parentNodeName) const;
 	XMLdocument ParseFile();
 
 public:

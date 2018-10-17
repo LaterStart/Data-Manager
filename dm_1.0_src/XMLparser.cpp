@@ -15,6 +15,7 @@ XMLparser::XMLparser(const char* cfgPath) {
 void XMLparser::LoadFile() {
 	if (status == filePathCorrect) {
 		buffer = new char[fileSize];
+		buffer[fileSize - 1] = '\0';
 		ifstream file(filePath, ifstream::binary);
 		file.read(buffer, fileSize);
 		status = xps::fileLoaded;
@@ -29,15 +30,6 @@ XMLdocument XMLparser::ParseFile() {
 		streamoff pos = 0, len, offset;
 		XMLnode node(0);
 		ReadNode(buffer, pos, node);
-
-		int test = 0;
-
-
-
-
-
-
-
 	}
 	else return XMLdocument();
 }
@@ -67,14 +59,17 @@ void XMLparser::ReadNode(char* buffer, streamoff& pos, XMLnode& node) {
 	CopyCharBuff(tag, buffer + offset, len);
 
 	if (ClosingTag(tag)) {		
-		if (ParentNodeCloseTag(tag, node.parentNode->name)) {
-			int test = 0;
-			return;
+		if (node.nodes->size() > 0) {
+			if (node.parentNode == nullptr)
+				return;
+			else
+				ReadNode(buffer, pos, *node.parentNode);
 		}
-			
-		CopyCharBuff(node.value, buffer + memPos1, memPos2 - memPos1);
+		else {
+			CopyCharBuff(node.value, buffer + memPos1, memPos2 - memPos1);
 
-		ReadNode(buffer, pos, *node.parentNode);
+			ReadNode(buffer, pos, *node.parentNode);
+		}
 	}
 	else {
 		char* rnt;		
@@ -108,7 +103,7 @@ streamoff XMLparser::Find(char* keyword, streamoff startPos = 0) {
 				return pos;
 			}
 		}
-	} while (pos++ < (fileSize - size));
+	} while (++pos <= fileSize);
 	delete[]checker;
 	return -1;
 }
@@ -121,12 +116,6 @@ void XMLparser::CopyCharBuff(char* &dest, char* source, streamoff len) {
 
 bool XMLparser::ClosingTag(char* tag) const {
 	if (tag[0] == '/')
-		return true;
-	else return false;
-}
-
-bool XMLparser::ParentNodeCloseTag(char* tag, char* parentNodeName) const {
-	if (strcmp(tag + 1, parentNodeName) == 0)
 		return true;
 	else return false;
 }
