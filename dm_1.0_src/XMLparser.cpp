@@ -1,4 +1,3 @@
-#include <iostream> //debug
 #include <fstream>
 #include "XMLparser.h"
 using namespace std;
@@ -195,4 +194,12 @@ std::vector<XMLnode*> XMLnode::SelectNodes(char* tagID, char* nodeHeader) {
 	for (auto& node : nodes)
 		node->SelectNodes(tagID, nodeHeader, vNodes);	
 	return vNodes;
+}
+
+XMLnode* XMLnode::SelectNode(char* tagID, bool singleLevel) {
+	for (auto& node : nodes) {
+		if (strcmp(node->tagID, tagID) == 0) 			
+				return node;
+	}
+	return nullptr;
 }

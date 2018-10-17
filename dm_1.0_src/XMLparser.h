@@ -34,6 +34,7 @@ private:
 
 public:
 	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr);
+	XMLnode* SelectNode(char* tagID, bool singleLevel);
 	std::vector<XMLnode*> SelectNodes(char* tagID, char* nodeHeader = nullptr);
 };
 
