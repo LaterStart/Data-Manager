@@ -1,5 +1,6 @@
 #pragma once
 #include <list>
+#include <vector>
 
 const enum xps {
 	inactive, filePathCorrect, incorrectFilePath, fileLoaded, fileInvalid, successParse
@@ -11,16 +12,19 @@ struct XMLnode {
 	~XMLnode();
 
 	XMLnode* parentNode{};
-	char* name{};
+	char* tagID{};
 	char* value{};
 	std::list<XMLnode*> nodes{};
+
+	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr);
 };
 
 struct XMLdocument {
 	XMLdocument() = default;
 	~XMLdocument();
 
-	std::list<XMLnode*> nodes;
+	std::vector<XMLnode*> trees;
+	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr, int treeID = -1);
 };
 
 class XMLparser {

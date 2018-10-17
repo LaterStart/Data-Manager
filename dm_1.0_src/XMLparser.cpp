@@ -30,8 +30,8 @@ XMLdocument* XMLparser::ParseFile() {
 		streamoff pos = 0, len, offset;
 
 		while ((fileSize - pos) > 1) {
-			doc->nodes.push_back(new XMLnode);
-			ReadXML(buffer, pos, *doc->nodes.back());
+			doc->trees.push_back(new XMLnode);
+			ReadXML(buffer, pos, *doc->trees.back());
 		}	
 
 		status = xps::successParse;
@@ -42,7 +42,7 @@ XMLdocument* XMLparser::ParseFile() {
 
 void XMLparser::ReadXML(char* buffer, streamoff& pos, XMLnode& node) {
 	streamoff offset, len, memPos1, memPos2;
-	if (node.name == nullptr) {
+	if (node.tagID == nullptr) {
 		pos = Find("<", pos) + 1;
 		if (pos == 0)
 			return;
@@ -51,7 +51,7 @@ void XMLparser::ReadXML(char* buffer, streamoff& pos, XMLnode& node) {
 		pos = Find(">", pos);
 		len = pos - len;
 
-		CopyCharBuff(node.name, buffer + offset, len);
+		CopyCharBuff(node.tagID, buffer + offset, len);
 	}
 	memPos1 = ++pos;
 
@@ -122,11 +122,11 @@ bool XMLparser::ClosingTag(char* tag) const {
 }
 
 XMLnode::XMLnode(char* name) {
-	this->name = name;	
+	this->tagID = name;	
 }
 
 XMLnode::~XMLnode() {
-	delete[]name;
+	delete[]tagID;
 	delete[]value;
 	for (auto& node : nodes) {
 		delete node;
@@ -138,7 +138,33 @@ XMLparser::~XMLparser() {
 }
 
 XMLdocument::~XMLdocument() {
-	for (auto& node : nodes) {
-		delete node;
+	for (auto& tree : trees) {
+		delete tree;
 	}
+}
+
+XMLnode* XMLdocument::SelectNode(char* tagID, char* nodeHeader, int treeID) {
+	size_t range = (treeID < 0) ? trees.size() : treeID + 1;
+	treeID = (treeID < 0) ? 0 : treeID;
+	for (size_t i = treeID; i < range; i++) {
+		XMLnode* node = trees[i]->SelectNode(tagID, nodeHeader);
+		if (node != nullptr)
+			return node;
+	}
+	return nullptr;
+}
+
+XMLnode* XMLnode::SelectNode(char* tagID, char* nodeHeader) {
+	if (strcmp(this->tagID, tagID) == 0) {
+		if (nodeHeader == nullptr)
+			return this;
+		else if (nodes.size() > 0 && strcmp(nodeHeader, nodes.front()->value) == 0)
+			return this;
+	}
+	for (auto& node : nodes) {
+		XMLnode* result = node->SelectNode(tagID, nodeHeader);
+		if (result != nullptr)
+			return result;
+	}
+	return nullptr;
 }
