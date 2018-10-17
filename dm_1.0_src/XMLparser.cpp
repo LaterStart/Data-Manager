@@ -6,35 +6,41 @@ using namespace std;
 XMLparser::XMLparser(const char* cfgPath) {
 	ifstream file(cfgPath, ifstream::ate | ifstream::binary);
 	fileSize = file.tellg();
-	if (fileSize > 0)
+	if (fileSize > 0) {
 		status = xps::filePathCorrect;
-	else status = xps::incorrectFilePath;
-	filePath = cfgPath;
+		filePath = cfgPath;
+		LoadFile();
+	}		
+	else status = xps::incorrectFilePath;	
 }
 
 void XMLparser::LoadFile() {
 	if (status == filePathCorrect) {
 		buffer = new char[fileSize];
-		buffer[fileSize - 1] = '\0';
 		ifstream file(filePath, ifstream::binary);
 		file.read(buffer, fileSize);
 		status = xps::fileLoaded;
-		ParseFile();
 	}
 	else return;
 }
 
-XMLdocument XMLparser::ParseFile() {
+XMLdocument* XMLparser::ParseFile() {	
 	if (status == fileLoaded) {
-		XMLdocument doc;
+		XMLdocument* doc = new XMLdocument;
 		streamoff pos = 0, len, offset;
-		XMLnode node(0);
-		ReadNode(buffer, pos, node);
+
+		while ((fileSize - pos) > 1) {
+			doc->nodes->push_back(new XMLnode);
+			ReadXML(buffer, pos, *doc->nodes->back());
+		}	
+
+		status = xps::successParse;
+		return doc;
 	}
-	else return XMLdocument();
+	else return nullptr;
 }
 
-void XMLparser::ReadNode(char* buffer, streamoff& pos, XMLnode& node) {
+void XMLparser::ReadXML(char* buffer, streamoff& pos, XMLnode& node) {
 	streamoff offset, len, memPos1, memPos2;
 	if (node.name == nullptr) {
 		pos = Find("<", pos) + 1;
@@ -63,25 +69,19 @@ void XMLparser::ReadNode(char* buffer, streamoff& pos, XMLnode& node) {
 			if (node.parentNode == nullptr)
 				return;
 			else
-				ReadNode(buffer, pos, *node.parentNode);
+				ReadXML(buffer, pos, *node.parentNode);
 		}
 		else {
 			CopyCharBuff(node.value, buffer + memPos1, memPos2 - memPos1);
-
-			ReadNode(buffer, pos, *node.parentNode);
+			ReadXML(buffer, pos, *node.parentNode);
 		}
 	}
 	else {
-		char* rnt;		
-		CopyCharBuff(rnt, buffer + memPos1, memPos2 - memPos1);
-		size_t lvl = strlen(rnt) - 2;
-		delete[]rnt;
-
-		XMLnode* childNode = new XMLnode(node.Level() + 1, tag);
+		XMLnode* childNode = new XMLnode(tag);
 		childNode->parentNode = &node;
 		node.nodes->push_back(childNode);
 
-		ReadNode(buffer, pos, *childNode);
+		ReadXML(buffer, pos, *childNode);
 	}	
 }
 
@@ -120,13 +120,11 @@ bool XMLparser::ClosingTag(char* tag) const {
 	else return false;
 }
 
-XMLnode::XMLnode(int level) {
-	this->level = level;
+XMLnode::XMLnode() {
 	nodes = new list<XMLnode*>;
 }
 
-XMLnode::XMLnode(int level, char* name) {
-	this->level = level;
+XMLnode::XMLnode(char* name) {
 	this->name = name;
 	nodes = new list<XMLnode*>;
 }
@@ -135,4 +133,12 @@ XMLnode::~XMLnode() {
 	delete[]name;
 	delete[]value;
 	delete nodes;
+}
+
+XMLdocument::XMLdocument() {
+	nodes = new list<XMLnode*>;
+}
+
+XMLparser::~XMLparser() {
+	delete[]buffer;
 }

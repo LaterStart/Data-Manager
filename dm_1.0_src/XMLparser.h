@@ -2,53 +2,44 @@
 #include <list>
 
 const enum xps {
-	inactive, filePathCorrect, incorrectFilePath, fileLoaded, fileInvalid
+	inactive, filePathCorrect, incorrectFilePath, fileLoaded, fileInvalid, successParse
 };
 
-class XMLnode {
-private: 
-	unsigned int level;
-
-public:
-	XMLnode(int level);
-	XMLnode(int level, char* name);
+struct XMLnode {
+	XMLnode();
+	XMLnode(char* name);
 	~XMLnode();
 
-public:
 	XMLnode* parentNode{};
 	char* name{};
 	char* value{};
-	std::list<XMLnode*>* nodes;
-	unsigned int Level() const;
+	std::list<XMLnode*>* nodes{};
 };
 
 struct XMLdocument {
-	const char* filePath{};
-	std::list<XMLnode> nodes;
+	XMLdocument();
+
+	std::list<XMLnode*>* nodes;
 };
 
 class XMLparser {
-private:
-	const char* filePath{};
-	char* buffer{};
-	std::streamoff fileSize{};
-	xps status = xps::inactive;	
-
+public:
+	XMLparser(const char* cfgPath);
+	~XMLparser();
 	
 private:
 	std::streamoff Find(char* keyword, std::streamoff startPos);
 	void CopyCharBuff(char* &dest, char* source, std::streamoff len);
-	void ReadNode(char* buffer, std::streamoff& pos, XMLnode& node);
-	bool ClosingTag(char* buffer) const;
-	XMLdocument ParseFile();
-
-public:
-	XMLparser(const char* cfgPath);
-
-public:
+	void ReadXML(char* buffer, std::streamoff& pos, XMLnode& node);
+	bool ClosingTag(char* buffer) const;	
 	void LoadFile();
-};
 
-inline unsigned int XMLnode::Level() const {
-	return level;
-}
+private:
+	const char* filePath{};
+	char* buffer{};
+	std::streamoff fileSize{};
+	xps status = xps::inactive;
+
+public:
+	XMLdocument * ParseFile();
+};
