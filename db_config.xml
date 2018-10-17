@@ -57,6 +57,14 @@
 		<table>
 			<name>TestTable_03</name>
 			<columns>
+			<column>
+					<name>id</name>
+					<type>int</type>
+					<identity>true</identity>	
+					<autoIncrement>true</autoIncrement>
+					<seedStart>1</seedStart>
+					<seedIncrease>1</seedIncrease>
+				</column>	
 				<column>
 					<name>TestCol_01-01</name>
 					<type>int</type>

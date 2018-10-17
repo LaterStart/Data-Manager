@@ -168,3 +168,31 @@ XMLnode* XMLnode::SelectNode(char* tagID, char* nodeHeader) {
 	}
 	return nullptr;
 }
+
+vector<XMLnode*> XMLdocument::SelectNodes(char* tagID, char* nodeHeader, int treeID) {
+	vector<XMLnode*> nodes;
+	size_t range = (treeID < 0) ? trees.size() : treeID + 1;
+	treeID = (treeID < 0) ? 0 : treeID;
+	for (size_t i = treeID; i < range; i++) 
+		trees[i]->SelectNodes(tagID, nodeHeader, nodes);
+
+	return nodes;
+}
+
+void XMLnode::SelectNodes(char* tagID, char* nodeHeader, vector<XMLnode*> &vNodes) {
+	if (strcmp(this->tagID, tagID) == 0) {
+		if (nodeHeader == nullptr)
+			vNodes.push_back(this);
+		else if (nodes.size() > 0 && strcmp(nodeHeader, nodes.front()->value) == 0)
+			vNodes.push_back(this);
+	}
+	for (auto& node : nodes) 
+		node->SelectNodes(tagID, nodeHeader, vNodes);
+}
+
+std::vector<XMLnode*> XMLnode::SelectNodes(char* tagID, char* nodeHeader) {
+	vector<XMLnode*> vNodes;
+	for (auto& node : nodes)
+		node->SelectNodes(tagID, nodeHeader, vNodes);	
+	return vNodes;
+}

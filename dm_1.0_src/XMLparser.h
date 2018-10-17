@@ -6,25 +6,35 @@ const enum xps {
 	inactive, filePathCorrect, incorrectFilePath, fileLoaded, fileInvalid, successParse
 };
 
-struct XMLnode {
-	XMLnode() = default;
-	XMLnode(char* name);
-	~XMLnode();
-
-	XMLnode* parentNode{};
-	char* tagID{};
-	char* value{};
-	std::list<XMLnode*> nodes{};
-
-	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr);
-};
-
+class XMLnode;
 struct XMLdocument {
 	XMLdocument() = default;
 	~XMLdocument();
 
 	std::vector<XMLnode*> trees;
 	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr, int treeID = -1);
+	std::vector<XMLnode*> SelectNodes(char* tagID, char* nodeHeader = nullptr, int treeID = -1);
+};
+
+class XMLnode {
+public:
+	XMLnode() = default;
+	XMLnode(char* name);
+	~XMLnode();
+
+public:
+	XMLnode* parentNode{};
+	char* tagID{};
+	char* value{};
+	std::list<XMLnode*> nodes{};
+
+private:
+	friend std::vector<XMLnode*> XMLdocument::SelectNodes(char* tagID, char* nodeHeader, int treeID);
+	void SelectNodes(char* tagID, char* nodeHeader, std::vector<XMLnode*> &vNodes);
+
+public:
+	XMLnode* SelectNode(char* tagID, char* nodeHeader = nullptr);
+	std::vector<XMLnode*> SelectNodes(char* tagID, char* nodeHeader = nullptr);
 };
 
 class XMLparser {
