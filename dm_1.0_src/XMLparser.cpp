@@ -30,8 +30,8 @@ XMLdocument* XMLparser::ParseFile() {
 		streamoff pos = 0, len, offset;
 
 		while ((fileSize - pos) > 1) {
-			doc->nodes->push_back(new XMLnode);
-			ReadXML(buffer, pos, *doc->nodes->back());
+			doc->nodes.push_back(new XMLnode);
+			ReadXML(buffer, pos, *doc->nodes.back());
 		}	
 
 		status = xps::successParse;
@@ -64,8 +64,9 @@ void XMLparser::ReadXML(char* buffer, streamoff& pos, XMLnode& node) {
 	char* tag;
 	CopyCharBuff(tag, buffer + offset, len);
 
-	if (ClosingTag(tag)) {		
-		if (node.nodes->size() > 0) {
+	if (ClosingTag(tag)) {
+		delete[]tag;
+		if (node.nodes.size() > 0) {
 			if (node.parentNode == nullptr)
 				return;
 			else
@@ -79,7 +80,7 @@ void XMLparser::ReadXML(char* buffer, streamoff& pos, XMLnode& node) {
 	else {
 		XMLnode* childNode = new XMLnode(tag);
 		childNode->parentNode = &node;
-		node.nodes->push_back(childNode);
+		node.nodes.push_back(childNode);
 
 		ReadXML(buffer, pos, *childNode);
 	}	
@@ -120,25 +121,24 @@ bool XMLparser::ClosingTag(char* tag) const {
 	else return false;
 }
 
-XMLnode::XMLnode() {
-	nodes = new list<XMLnode*>;
-}
-
 XMLnode::XMLnode(char* name) {
-	this->name = name;
-	nodes = new list<XMLnode*>;
+	this->name = name;	
 }
 
 XMLnode::~XMLnode() {
 	delete[]name;
 	delete[]value;
-	delete nodes;
-}
-
-XMLdocument::XMLdocument() {
-	nodes = new list<XMLnode*>;
+	for (auto& node : nodes) {
+		delete node;
+	}
 }
 
 XMLparser::~XMLparser() {
 	delete[]buffer;
+}
+
+XMLdocument::~XMLdocument() {
+	for (auto& node : nodes) {
+		delete node;
+	}
 }

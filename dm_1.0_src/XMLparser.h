@@ -6,20 +6,21 @@ const enum xps {
 };
 
 struct XMLnode {
-	XMLnode();
+	XMLnode() = default;
 	XMLnode(char* name);
 	~XMLnode();
 
 	XMLnode* parentNode{};
 	char* name{};
 	char* value{};
-	std::list<XMLnode*>* nodes{};
+	std::list<XMLnode*> nodes{};
 };
 
 struct XMLdocument {
-	XMLdocument();
+	XMLdocument() = default;
+	~XMLdocument();
 
-	std::list<XMLnode*>* nodes;
+	std::list<XMLnode*> nodes;
 };
 
 class XMLparser {
