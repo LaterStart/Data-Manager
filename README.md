@@ -7,4 +7,4 @@ Challenge to overcome: implementation of generalized class serialization and des
 ---------------------------------------------------------------------------------------------------------------------------------
 
 - Phase 01. Designing solution - in progress
-- Phase 02. Implementation of custom XML parser - database tables and columns configuration through XML document - in progress
+- Phase 02. Implementation of custom XML parser - database tables and columns configuration through XML document - paused
