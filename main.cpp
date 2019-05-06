@@ -1,12 +1,11 @@
 #include <iostream> // debug
-#include "dm_1.0_src/XMLparser.h"
-#include "dm_1.0_src/DbContext.h"
+#include "XMLparser.h"
 using namespace std;
 
 // TESTER FILE
 int main() {
 	// Parse XML document
-	XMLparser parser("db_config.xml");
+	XMLparser parser("example.xml");
 	XMLdocument* cfg = parser.ParseFile();
 
 	// Select first node to meet tag id condition
@@ -27,9 +26,6 @@ int main() {
 	vector<XMLnode*> nodes02 = cfg->SelectNodes("table");
 	vector<XMLnode*> nodes03 = node03->SelectNodes("table");
 	vector<XMLnode*> nodes04 = node04->SelectNodes("column");
-
-	// Create dbContext from XML config file
-	DbContext dbContext(cfg);
 
 	return 0;
 }
